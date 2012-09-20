@@ -4,7 +4,7 @@
  * Plugin URI: http://wordpress.org/extend/plugins/oembed-javascript-fallback/
  * Description: Fall back to oEmbed over Javascript if the embed fails
  * Version:     0.1
- * Author:      Automattic, Daniel Bachhuber
+ * Author:      Automattic, Mo Jangda, Daniel Bachhuber
  * Author URI: http://automattic.com/
  */
 
@@ -27,31 +27,33 @@ class oEmbed_Javascript_Fallback {
 		// handle failed tweets or tweets that haven't been fetched yet
 		jQuery(function($) {
 		
-			$( 'span.oembed-javascript-fallback' ).each( do_client_side_twitter_oembed );
+			function ofj_do_embeds() {
+				// Stolen from wpcom. We should support all of the native oembed providers
+				$( 'span.oembed-javascript-fallback' ).each( function() {
+					var $this = $(this),
+					text = $this.text(),
+					url = 'http://api.twitter.com/1/statuses/oembed.json?omit_script=true&callback=?&';
 
-			// Stolen from wpcom. We should support all of the native oembed providers
-			function do_client_side_twitter_oembed() {
-				var $this = $(this),
-				text = $this.text(),
-				url = 'http://api.twitter.com/1/statuses/oembed.json?omit_script=true&callback=?&';
-
-				// If we find an exact match, we want to fetch its content from the oembed endpoint and display it
-				if ( text.match( /^http(s|):\/\/twitter\.com(\/\#\!\/|\/)([a-zA-Z0-9_]{1,20})\/status(es)*\/(\d+)$/ ) ) {
-					url += 'url=' + encodeURIComponent( text );
-				} else if ( text.match( /^(\d+)$/ ) ) {
-					url += 'id=' + text;
-				} else {
-					return;
-				}
-
-				// Need to make a JSONP call to avoid CORS issues
-				$.getJSON( url, function( data ) {
-					if ( data.html ) {
-						$this.html( data.html );
-						$this.show();
+					// If we find an exact match, we want to fetch its content from the oembed endpoint and display it
+					if ( text.match( /^http(s|):\/\/twitter\.com(\/\#\!\/|\/)([a-zA-Z0-9_]{1,20})\/status(es)*\/(\d+)$/ ) ) {
+						url += 'url=' + encodeURIComponent( text );
+					} else if ( text.match( /^(\d+)$/ ) ) {
+						url += 'id=' + text;
+					} else {
+						return;
 					}
-				} );
+
+					// Need to make a JSONP call to avoid CORS issues
+					$.getJSON( url, function( data ) {
+						if ( data.html ) {
+							$this.html( data.html );
+							$this.show();
+						}
+					} );
+					setTimeout( 'ofj_do_embeds', 10000 );
+				});
 			}
+			ofj_do_embeds();
 		});
 		</script>
 		<?php
