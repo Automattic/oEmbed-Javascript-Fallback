@@ -27,7 +27,7 @@ class oEmbed_Javascript_Fallback {
 		// handle failed tweets or tweets that haven't been fetched yet
 		jQuery(function($) {
 		
-			function ofj_do_embeds() {
+			var ofj_do_embeds = function ofj_do_embeds() {
 				// Stolen from wpcom. We should support all of the native oembed providers
 				$( 'span.oembed-javascript-fallback' ).each( function() {
 					var $this = $(this),
@@ -50,8 +50,8 @@ class oEmbed_Javascript_Fallback {
 							$this.show();
 						}
 					} );
-					setTimeout( 'ofj_do_embeds', 10000 );
 				});
+				setTimeout( ofj_do_embeds, 10000 );
 			}
 			ofj_do_embeds();
 		});
